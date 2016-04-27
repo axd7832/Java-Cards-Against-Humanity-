@@ -1,4 +1,3 @@
-
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
@@ -6,7 +5,7 @@ import java.net.*;
 import java.util.*;
 import javax.swing.*;
 
-public class CardsClient extends JFrame {
+public class CardsClient extends JFrame implements Serializable {
 
    private JPanel jpCenter;
    private JPanel jpNorth;
@@ -39,10 +38,11 @@ public class CardsClient extends JFrame {
    private JMenuItem jmiNew;
    private JMenuItem jmiExit;
 
-   private Socket ss = null;
-   
+   private Socket cs = null;
    private OutputStream out = null;
-   private PrintWriter pout = null;
+   private ObjectOutputStream oos = null;
+   private InputStream in = null;
+   private ObjectInputStream ois = null;
    
    private final String IP = "localhost";
    private final int PORT = 16789;
@@ -217,36 +217,41 @@ public class CardsClient extends JFrame {
                public void actionPerformed(ActionEvent ae) {
                   try{
                      //Socket
-                     ss = new Socket( IP , PORT);
+                     cs = new Socket("10.100.100.9", PORT);
+                     
                      //Output Stream
-                     out = ss.getOutputStream();
+                     out = cs.getOutputStream();
+                     oos = new ObjectOutputStream(out);
+                     
                      //Input Stream
-                     pout = new PrintWriter(out);
+                     in = cs.getInputStream();
+                     ois = new ObjectInputStream(in);
+                     
+                     if(clientName == null){
+                        clientName = JOptionPane.showInputDialog(jbSend,"Please enter a username");
+                        oos.writeObject(clientName); 
+                        oos.flush();             
+                     }
+
                      //Thread to Update the Text Area
-                     ClientThread ct = new ClientThread(ss);
+                     ClientThread ct = new ClientThread(cs);
                      ct.start();
                      
                      
                      jbSend.addActionListener(
                            new ActionListener(){
                               public void actionPerformed(ActionEvent ae) {
-                                 //try{
-                                   //Client enters username
-                                 if(clientName == null){
-                                    clientName = JOptionPane.showInputDialog(jbSend,"Please enter a username");
+                                 try{
+                                    if(jtaClient.getText().length() > 0){
+                                       String clientMsg = jtaClient.getText();
+                                       oos.writeObject(clientMsg);
+                                       oos.flush();
+                                       jtaClient.setText("");
+                                    }   
                                  }
-                                 if(jtaClient.getText().length() > 0){
-                                    String clientMsg = jtaClient.getText();
-                                       //Writes then flushes
-                                    pout.println(clientName + ": " + clientMsg);		// Writes some String to server
-                                    pout.flush();
-                                    jtaClient.setText("");
-                                    	// forces the data through to server
-                                 }   
-                                 // }
-                              //                                  catch( ArrayIndexOutOfBoundsException aioobe ) {
-                              //                                     System.out.println("\nUsage: java Day10Server hostname some-word");
-                              //                                  }
+                                catch (IOException oie) {
+                                 System.out.println("IO Exception");
+                                }                                 
                               }	
                            });   
                   } 
@@ -281,25 +286,32 @@ public class CardsClient extends JFrame {
    //new ChatClient();
    }
    class ClientThread extends Thread{
-      InputStream in = null;
-      BufferedReader bin = null;
-      Socket ss2 = null;
       
-      public ClientThread(Socket ss){
-         ss2 = ss;
+      Socket cs;
+      String clientMessage;
+            
+      public ClientThread(Socket cs){
+         this.cs = cs;
       }  
       public void run(){
          try{
-            in = ss2.getInputStream();
-            bin = new BufferedReader(new InputStreamReader(in));
             //Always updates 
             while(true){
-               String serverMsg = bin.readLine();
-               jtaServer.append("\n" + serverMsg);
+               Object readIn = ois.readObject();
+             
+               if (readIn instanceof String) {
+                  clientMessage = (String) readIn;
+                  System.out.println(clientMessage);
+                  //change to append to text area
+                  jtaServer.append(clientMessage+"\n");
+               }
             }
          }
          catch(ConnectException ce ) { 
             System.out.println("Server is Not Online"); 
+         }
+         catch(ClassNotFoundException cnfe) {
+            System.out.println("class not found");
          }
          catch(UnknownHostException uhe) {
             System.out.println("no host");
