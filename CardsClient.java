@@ -5,60 +5,33 @@ import java.net.*;
 import java.util.*;
 import javax.swing.*;
 
-public class CardsClient extends JFrame //implements ActionListener
-{
-
-   private static final long serialVersionUID = 1L;
-
-   public volatile static String winner = "";
-
-   private boolean sendCards = false;
-   private boolean beginRound = false;
-   private boolean judge = false;
-   private boolean player = false;
-   private boolean judgeDecision = false;
-
-   private int outInt = 0;
-   private int playerScore = 0;
-   private String sentenceString;
-
-   private Map<Integer, String> playerCards;
-   ArrayList<Integer> keyList = new ArrayList<Integer>();
+public class CardsClient extends JFrame {
 
    private JPanel jpCenter;
    private JPanel jpNorth;
-   private JPanel chatPanel;
-
-   private JTextArea sentenceArea;
+   private JPanel jpChat;
+   private JPanel jpRightChat;
+   private JPanel jpScore;
 
    private JButton c1;
    private JButton c2;
    private JButton c3;
    private JButton c4;
    private JButton c5;
+   private JButton c6;
+   private JButton c7;
+   private JButton c8;
    private JButton cBlack;
-
-   private JTextArea cardLabel1;
-   private JTextArea cardLabel2;
-   private JTextArea cardLabel3;
-   private JTextArea cardLabel4;
-   private JTextArea cardLabel5;
-   private JTextArea cardLabel6;
-
-   private JPanel jpChat;
-   private JPanel jpRightChat;
+   private JButton jbSend;
+   private JButton jbConnect;
    
-   private JPanel jpTop;
-   private JPanel jpBottom;
-   private JPanel jpServerConnect;
-   
-   private JFrame frame;
+   private JTextField jtf1;
+   private JTextField jtf2;
+   private JTextField jtf3;
+   private JTextField jtf4;
    
    private JTextArea jtaServer;
    private JTextArea jtaClient;
-   
-   private JButton jbSend;
-   private JButton jbConnect;
    
    private JMenuBar jmb;
    private JMenu jmFile;
@@ -69,9 +42,8 @@ public class CardsClient extends JFrame //implements ActionListener
    
    private OutputStream out = null;
    private PrintWriter pout = null;
-   //IP
+   
    private final String IP = "localhost";
-   //PORT #
    private final int PORT = 16789;
    
    private String clientName;
@@ -79,114 +51,107 @@ public class CardsClient extends JFrame //implements ActionListener
 
    public CardsClient()
    {
-      setTitle("Cards Against Humanity Online");
+      setTitle("Cards Against Humanity");
       setLayout(new BorderLayout());
-   
-      Font sentenceFont = new Font("Arial", Font.ITALIC + Font.BOLD, 15);
-   
+      
       Dimension cardDimen = new Dimension(165, 180);
-      Font cardLabelFont = new Font("Arial", Font.BOLD, 16);
       Font cardFont = new Font("Arial", Font.BOLD, 20);
-      Color backgroundColor = new Color(238, 238, 238);
       
       //JmenuBar
       jmb = new JMenuBar();
       setJMenuBar(jmb);
-         jmFile = new JMenu("File");
-         jmb.add(jmFile);
-            jmiNew = new JMenuItem("New Game");
-            jmFile.add(jmiNew);
-            jmiExit = new JMenuItem("Exit");
-            jmFile.add(jmiExit);
+      jmFile = new JMenu("File");
+      jmb.add(jmFile);
+      jmiNew = new JMenuItem("New Game");
+      jmFile.add(jmiNew);
+      jmiExit = new JMenuItem("Exit");
+      jmFile.add(jmiExit);
          
       //white card 1
       c1 = new JButton("1");
       c1.setFont(cardFont);
-      c1.setVerticalAlignment(SwingConstants.BOTTOM);
-      c1.setLayout(new BorderLayout());
-      cardLabel1 = new JTextArea();
-      cardLabel1.setLineWrap(true);
-      cardLabel1.setWrapStyleWord(true);
-      cardLabel1.setFont(cardLabelFont);
-      cardLabel1.setEditable(false);
-      cardLabel1.setBackground(backgroundColor);
       c1.setPreferredSize(cardDimen);
-      c1.add(BorderLayout.NORTH, cardLabel1);
       c1.setEnabled(false);
    
       //white card 2
       c2 = new JButton("2");
       c2.setFont(cardFont);
-      c2.setVerticalAlignment(SwingConstants.BOTTOM);
-      c2.setLayout(new BorderLayout());
-      cardLabel2 = new JTextArea();
-      cardLabel2.setLineWrap(true);
-      cardLabel2.setWrapStyleWord(true);
-      cardLabel2.setFont(cardLabelFont);
-      cardLabel2.setEditable(false);
-      cardLabel2.setBackground(backgroundColor);
       c2.setPreferredSize(cardDimen);
-      c2.add(BorderLayout.NORTH, cardLabel2);
       c2.setEnabled(false);
-  
+   
       //white card 3
       c3 = new JButton("3");
       c3.setFont(cardFont);
-      c3.setVerticalAlignment(SwingConstants.BOTTOM);
-      c3.setLayout(new BorderLayout());
-      cardLabel3 = new JTextArea();
-      cardLabel3.setLineWrap(true);
-      cardLabel3.setWrapStyleWord(true);
-      cardLabel3.setFont(cardLabelFont);
-      cardLabel3.setEditable(false);
-      cardLabel3.setBackground(backgroundColor);
       c3.setPreferredSize(cardDimen);
-      c3.add(BorderLayout.NORTH, cardLabel3);
       c3.setEnabled(false);
    
       //white card 4
       c4 = new JButton("4");
       c4.setFont(cardFont);
-      c4.setVerticalAlignment(SwingConstants.BOTTOM);
-      c4.setLayout(new BorderLayout());
-      cardLabel4 = new JTextArea();
-      cardLabel4.setLineWrap(true);
-      cardLabel4.setWrapStyleWord(true);
-      cardLabel4.setFont(cardLabelFont);
-      cardLabel4.setEditable(false);
-      cardLabel4.setBackground(backgroundColor);
       c4.setPreferredSize(cardDimen);
-      c4.add(BorderLayout.NORTH, cardLabel4);
       c4.setEnabled(false);
    
       //white card 5
       c5 = new JButton("5");
       c5.setFont(cardFont);
-      c5.setVerticalAlignment(SwingConstants.BOTTOM);
-      c5.setLayout(new BorderLayout());
-      cardLabel5 = new JTextArea();
-      cardLabel5.setLineWrap(true);
-      cardLabel5.setFont(cardLabelFont);
-      cardLabel5.setEditable(false);
-      cardLabel5.setBackground(backgroundColor);
       c5.setPreferredSize(cardDimen);
-      c5.add(BorderLayout.NORTH, cardLabel5);
       c5.setEnabled(false);
       
       //black card
       cBlack = new JButton("Black Card");
       cBlack.setFont(cardFont);
-      cBlack.setVerticalAlignment(SwingConstants.BOTTOM);
-      cBlack.setLayout(new BorderLayout());
-      cardLabel6 = new JTextArea();
-      cardLabel6.setLineWrap(true);
-      cardLabel6.setFont(cardLabelFont);
-      cardLabel6.setEditable(false);
-      cardLabel6.setBackground(backgroundColor);
+      cBlack.setBackground(Color.BLACK);
+      cBlack.setForeground(Color.BLACK);
       cBlack.setPreferredSize(cardDimen);
-      cBlack.add(BorderLayout.NORTH, cardLabel6);
+      cBlack.setOpaque(true);
       cBlack.setEnabled(false);
-
+      
+      //other players cards (for cardmaster)
+      c6 = new JButton("");
+      c6.setFont(cardFont);
+      c6.setPreferredSize(cardDimen);
+      c6.setEnabled(false);
+      
+      c7 = new JButton("");
+      c7.setFont(cardFont);
+      c7.setPreferredSize(cardDimen);
+      c7.setEnabled(false);
+      
+      c8 = new JButton("");
+      c8.setFont(cardFont);
+      c8.setPreferredSize(cardDimen);
+      c8.setEnabled(false);
+      
+      
+      //score keeper
+      /*
+      *Save the players usernames from chat and put on scoreboard
+      *Set the scores to zero in un-editable texfields
+      */
+      jpScore = new JPanel(new GridLayout(0,2));
+      jtf1 = new JTextField(3);
+         jtf1.setText("0");
+         jtf1.setEnabled(false);
+      jtf2 = new JTextField(3);
+         jtf2.setText("0");
+         jtf2.setEnabled(false);
+      jtf3 = new JTextField(3);
+         jtf3.setText("0");
+         jtf3.setEnabled(false);
+      jtf4 = new JTextField(3);
+         jtf4.setText("0");
+         jtf4.setEnabled(false);
+      jpScore.add(new JLabel("Player 1:", JLabel.RIGHT));
+      jpScore.add(jtf1);
+      jpScore.add(new JLabel("Player 2:", JLabel.RIGHT));
+      jpScore.add(jtf2);
+      jpScore.add(new JLabel("Player 3:", JLabel.RIGHT));
+      jpScore.add(jtf3);
+      jpScore.add(new JLabel("Player 4:", JLabel.RIGHT));
+      jpScore.add(jtf4);
+      
+      
+   
    
       //c1.addActionListener(this);
       //c2.addActionListener(this);
@@ -203,7 +168,11 @@ public class CardsClient extends JFrame //implements ActionListener
       add(jpChat,BorderLayout.SOUTH);
    
       jpNorth.add(cBlack);
-
+      jpNorth.add(c6);
+      jpNorth.add(c7);
+      jpNorth.add(c8);
+      jpNorth.add(jpScore);
+   
       jpCenter.add(c1);
       jpCenter.add(c2);
       jpCenter.add(c3);
@@ -341,5 +310,4 @@ public class CardsClient extends JFrame //implements ActionListener
          
       }
    }
-
-}//end class
+}

@@ -10,7 +10,10 @@ import java.util.*;
 public class CardsServer {
    
    //Array of PrintWriters
-   Vector <PrintWriter> toClients = new Vector <PrintWriter>();
+   Vector <ObjectOutputStream> AllClients = new Vector <ObjectOutputStream>(); //Players + CardMaster
+   Vector <BlackCard> blackArray  = new Vector<BlackCard>();  
+   int playerNumber;
+   int cardMaster;
    
    /**
     * main method that calls the ChatServer constructor
@@ -27,8 +30,10 @@ public class CardsServer {
       ServerSocket ss = null;
       try {
          ss = new ServerSocket(16789);
+         System.out.println("Server Running...");
          Socket cs = null;
-         while(true){ 		// run forever once up     
+         while(true){ 
+            // run forever once up     
             cs = ss.accept(); 				// wait for connection
             ThreadServer ths = new ThreadServer( cs );
             ths.start();
@@ -41,34 +46,51 @@ public class CardsServer {
          System.out.println("Connection Failure");
       }
    } // end main
-   /**
-    * ThreadServer that extends Thread.
-    * Thread that reads/wr
-    ites to PrintWriter and BufferedReader
-    */
    class ThreadServer extends Thread {
       Socket cs;
+      Object to = null;
+      int playerNumber;
       public ThreadServer( Socket cs ) {
          this.cs = cs;
       }
+      public int getPlayerNumber(){
+         return this.playerNumber;
+      }
+      public void setPlayerNumber(int num){
+         this.playerNumber = num;
+         }
       public void run() {
-         BufferedReader br;
-         PrintWriter opw;
+         InputStream in;
+         OutputStream out;
          String clientMsg;
          try {
             //Input
-            br = new BufferedReader(new InputStreamReader( cs.getInputStream()));
-            //Output
-            opw = new PrintWriter( new OutputStreamWriter(cs.getOutputStream()));				
-            toClients.add(opw); //adds to output list
-            opw.println("Welcome to the Server!");
-            opw.flush();
-            while((clientMsg = br.readLine() ) != null ){  ///continuously reads lines of input     
-               for(PrintWriter pw: toClients){ //writes to all clients
-                  System.out.println(clientMsg);
-                  pw.println(clientMsg);	//to client
-                  pw.flush(); //clears the remaining data in the PrintWriter
+            synchronized(AllClients){
+               ++this.playerNumber;
+               setPlayerNumber(this.playerNumber);
+            }
+            out = cs.getOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(out);
+            
+            in = cs.getInputStream();
+            ObjectInputStream ois = new ObjectInputStream(in);
+            
+            AllClients.add(oos); //adds Client to the Vector list 
+            while( (to = ois.readObject() )  != null ){
+               if (to instanceof String){ 
+                  clientMsg = (String)to;
+                  for(ObjectOutputStream client: AllClients){ //writes to all clients
+                     System.out.println(clientMsg);
+                     oos.writeObject(clientMsg);	//to client
+                     oos.flush(); //clears the remaining data in the PrintWriter
+                  }
                }
+               else if(to instanceof BlackCard){
+                  
+               }
+               else if(to instanceof WhiteCard){
+                  
+               }      			
             }
          }
          catch( SocketException se ) { 
@@ -76,6 +98,9 @@ public class CardsServer {
          }
          catch( IOException e ) { 
             System.out.println("Connection Failed"); 
+         }
+         catch(ClassNotFoundException cnfe){
+            System.out.println("Class Not Found!");
          }
       } // end while
    } // end class ThreadServer 
