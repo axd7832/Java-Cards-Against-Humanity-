@@ -1,6 +1,6 @@
+import java.io.*;
 
-
-public class Card {
+public class Card implements Serializable {
 
    //attributes
    private String message;

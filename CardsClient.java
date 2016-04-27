@@ -5,7 +5,7 @@ import java.net.*;
 import java.util.*;
 import javax.swing.*;
 
-public class CardsClient extends JFrame implements Serializable {
+public class CardsClient extends JFrame implements Serializable, ActionListener {
 
    private JPanel jpCenter;
    private JPanel jpNorth;
@@ -56,7 +56,7 @@ public class CardsClient extends JFrame implements Serializable {
       setLayout(new BorderLayout());
       
       Dimension cardDimen = new Dimension(165, 180);
-      Font cardFont = new Font("Arial", Font.BOLD, 20);
+      Font cardFont = new Font("Arial", Font.BOLD, 14);
       
       //JmenuBar
       jmb = new JMenuBar();
@@ -68,44 +68,60 @@ public class CardsClient extends JFrame implements Serializable {
       jmiExit = new JMenuItem("Exit");
       jmFile.add(jmiExit);
          
-      //white card 1
-      c1 = new JButton("1");
+      //white card 
+      c1 = new JButton();
       c1.setFont(cardFont);
       c1.setPreferredSize(cardDimen);
+      c1.setBackground(Color.WHITE);
+      c1.setOpaque(true);
+      c1.setBorderPainted(false);
       c1.setEnabled(false);
    
       //white card 2
-      c2 = new JButton("2");
+      c2 = new JButton();
       c2.setFont(cardFont);
       c2.setPreferredSize(cardDimen);
+      c2.setBackground(Color.WHITE);
+      c2.setOpaque(true);
+      c2.setBorderPainted(false);
       c2.setEnabled(false);
    
       //white card 3
-      c3 = new JButton("3");
+      c3 = new JButton();
       c3.setFont(cardFont);
       c3.setPreferredSize(cardDimen);
+      c3.setBackground(Color.WHITE);
+      c3.setOpaque(true);
+      c3.setBorderPainted(false);
       c3.setEnabled(false);
    
       //white card 4
-      c4 = new JButton("4");
+      c4 = new JButton();
       c4.setFont(cardFont);
       c4.setPreferredSize(cardDimen);
+      c4.setBorderPainted(false);
+      c4.setBackground(Color.WHITE);
+      c4.setOpaque(true);
       c4.setEnabled(false);
    
       //white card 5
-      c5 = new JButton("5");
+      c5 = new JButton();
       c5.setFont(cardFont);
       c5.setPreferredSize(cardDimen);
+      c5.setBorderPainted(false);
+      c5.setBackground(Color.WHITE);
+      c5.setOpaque(true);
       c5.setEnabled(false);
       
       //black card
       cBlack = new JButton("Black Card");
       cBlack.setFont(cardFont);
       cBlack.setBackground(Color.BLACK);
-      cBlack.setForeground(Color.BLACK);
+      cBlack.setForeground(Color.WHITE);
       cBlack.setPreferredSize(cardDimen);
       cBlack.setOpaque(true);
-      cBlack.setEnabled(false);
+      cBlack.setBorderPainted(false);
+      cBlack.setEnabled(true);
       
       //other players cards (for cardmaster)
       c6 = new JButton("");
@@ -131,17 +147,17 @@ public class CardsClient extends JFrame implements Serializable {
       */
       jpScore = new JPanel(new GridLayout(0,2));
       jtf1 = new JTextField(3);
-         jtf1.setText("0");
-         jtf1.setEnabled(false);
+      jtf1.setText("0");
+      jtf1.setEnabled(false);
       jtf2 = new JTextField(3);
-         jtf2.setText("0");
-         jtf2.setEnabled(false);
+      jtf2.setText("0");
+      jtf2.setEnabled(false);
       jtf3 = new JTextField(3);
-         jtf3.setText("0");
-         jtf3.setEnabled(false);
+      jtf3.setText("0");
+      jtf3.setEnabled(false);
       jtf4 = new JTextField(3);
-         jtf4.setText("0");
-         jtf4.setEnabled(false);
+      jtf4.setText("0");
+      jtf4.setEnabled(false);
       jpScore.add(new JLabel("Player 1:", JLabel.RIGHT));
       jpScore.add(jtf1);
       jpScore.add(new JLabel("Player 2:", JLabel.RIGHT));
@@ -154,11 +170,11 @@ public class CardsClient extends JFrame implements Serializable {
       
    
    
-      //c1.addActionListener(this);
-      //c2.addActionListener(this);
-      //c3.addActionListener(this);
-      //c4.addActionListener(this);
-      //c5.addActionListener(this);
+      c1.addActionListener(this);
+      c2.addActionListener(this);
+      c3.addActionListener(this);
+      c4.addActionListener(this);
+      c5.addActionListener(this);
       
       jpNorth = new JPanel(new FlowLayout());
       jpCenter = new JPanel (new FlowLayout());
@@ -232,7 +248,10 @@ public class CardsClient extends JFrame implements Serializable {
                         oos.writeObject(clientName); 
                         oos.flush();             
                      }
-
+                     
+                     BlackCard bc = new BlackCard("black card");
+                     oos.writeObject(bc);
+                  
                      //Thread to Update the Text Area
                      ClientThread ct = new ClientThread(cs);
                      ct.start();
@@ -249,9 +268,9 @@ public class CardsClient extends JFrame implements Serializable {
                                        jtaClient.setText("");
                                     }   
                                  }
-                                catch (IOException oie) {
-                                 System.out.println("IO Exception");
-                                }                                 
+                                 catch (IOException oie) {
+                                    System.out.println("IO Exception");
+                                 }                                 
                               }	
                            });   
                   } 
@@ -279,6 +298,10 @@ public class CardsClient extends JFrame implements Serializable {
       setVisible(true);
    
    }//end constructor
+   
+   public void actionPerformed(ActionEvent ae) {
+      Object choice = ae.getSource();
+   }
 
    public static void main(String [] args)
    {
@@ -301,9 +324,33 @@ public class CardsClient extends JFrame implements Serializable {
              
                if (readIn instanceof String) {
                   clientMessage = (String) readIn;
-                  System.out.println(clientMessage);
                   //change to append to text area
                   jtaServer.append(clientMessage+"\n");
+               }
+               
+               else if (readIn instanceof BlackCard) {
+                  BlackCard msg = (BlackCard)readIn;
+                  String cardmsg = msg.getMessage();
+                  cardmsg = toHtml(cardmsg, 14);
+                  cBlack.setText("<html><center>" + cardmsg + "</center></html>");
+               }
+               
+               else if (readIn instanceof WhiteCard) {
+                  if (c1.getText() == "") {
+                     setWhiteText(c1, readIn);
+                  }
+                  else if (c2.getText() == "") {
+                     setWhiteText(c2, readIn);
+                  }
+                  else if (c3.getText() == "") {
+                     setWhiteText(c3, readIn);
+                  }
+                  else if (c4.getText() == "") {
+                     setWhiteText(c4, readIn);
+                  }
+                  else {
+                     setWhiteText(c5, readIn);
+                  }
                }
             }
          }
@@ -320,7 +367,38 @@ public class CardsClient extends JFrame implements Serializable {
          {
             System.out.println("Server was terminated...");
          }
-         
+       
       }
+      public void setWhiteText(JButton jb, Object _readIn) {
+         WhiteCard wc = (WhiteCard)_readIn;
+         String wcMsg = wc.getMessage();
+         wcMsg = toHtml(wcMsg, 14);
+         jb.setText("<html><center>" + wcMsg + "</center></html>");
+         jb.setEnabled(true);   
+      }
+      
+      public String toHtml(String text, int number) {
+         StringBuilder sb = new StringBuilder(text);
+         int loc = 0;
+         String space = " ";
+         loc = loc + number;
+         while (loc < sb.length()) {
+            createLine(loc, sb);
+            loc = loc + number;  
+         }
+         text = sb.toString();
+         return text;
+      }
+      
+      public void createLine(int _loc, StringBuilder _sb) {
+         if (_sb.charAt(_loc) == ' ') {
+            _sb.insert(_loc, "<br>");
+         }
+         else {
+            _loc--;
+            createLine(_loc, _sb);
+         }
+      }
+   
    }
 }
