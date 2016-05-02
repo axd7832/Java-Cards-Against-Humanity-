@@ -233,7 +233,7 @@ public class CardsClient extends JFrame implements Serializable, ActionListener 
                public void actionPerformed(ActionEvent ae) {
                   try{
                      //Socket
-                     cs = new Socket("10.100.100.9", PORT);
+                     cs = new Socket(IP, PORT);
                      
                      //Output Stream
                      out = cs.getOutputStream();
@@ -331,7 +331,7 @@ public class CardsClient extends JFrame implements Serializable, ActionListener 
                else if (readIn instanceof BlackCard) {
                   BlackCard msg = (BlackCard)readIn;
                   String cardmsg = msg.getMessage();
-                  cardmsg = toHtml(cardmsg, 14);
+                  cardmsg = toHtml(cardmsg, 18);
                   cBlack.setText("<html><center>" + cardmsg + "</center></html>");
                }
                
@@ -372,7 +372,7 @@ public class CardsClient extends JFrame implements Serializable, ActionListener 
       public void setWhiteText(JButton jb, Object _readIn) {
          WhiteCard wc = (WhiteCard)_readIn;
          String wcMsg = wc.getMessage();
-         wcMsg = toHtml(wcMsg, 14);
+         wcMsg = toHtml(wcMsg, 18);
          jb.setText("<html><center>" + wcMsg + "</center></html>");
          jb.setEnabled(true);   
       }
